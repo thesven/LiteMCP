@@ -43,19 +43,24 @@ This is an example Cloudflare Workers deployment using the LiteMCP library. It d
 
 ### Deployment
 
-1. **Set up KV namespace (optional for caching):**
+1. **Set up KV namespace (required for caching):**
    ```bash
    cd packages/example-server
-   wrangler kv:namespace create "CACHE"
-   wrangler kv:namespace create "CACHE" --preview
+   npx wrangler kv:namespace create "CACHE" --env production
+   npx wrangler kv:namespace create "CACHE" --env preview
    ```
 
 2. **Update wrangler.toml with your KV namespace IDs:**
    ```toml
    [[kv_namespaces]]
    binding = "CACHE"
-   id = "your-production-namespace-id"
-   preview_id = "your-preview-namespace-id"
+   id = "d7761d7ad9b7494287403999c6755501" # production
+   preview_id = "f8256e7c6e8a400b9239c5f88bdbfd9b" # preview
+
+   [env.preview]
+   [[env.preview.kv_namespaces]]
+   binding = "CACHE"
+   id = "f8256e7c6e8a400b9239c5f88bdbfd9b"
    ```
 
 3. **Deploy to Cloudflare Workers:**

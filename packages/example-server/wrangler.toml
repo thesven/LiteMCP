@@ -9,5 +9,10 @@ MCP_SERVER_VERSION = "1.0.0"
 
 [[kv_namespaces]]
 binding = "CACHE"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
+id = "d7761d7ad9b7494287403999c6755501" # production
+preview_id = "f8256e7c6e8a400b9239c5f88bdbfd9b" # preview
+
+[env.preview]
+[[env.preview.kv_namespaces]]
+binding = "CACHE"
+id = "f8256e7c6e8a400b9239c5f88bdbfd9b"
