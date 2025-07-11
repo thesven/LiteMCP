@@ -1,0 +1,75 @@
+{
+  "name": "litemcp",
+  "version": "1.0.0",
+  "description": "A lightweight, complete Model Context Protocol (MCP) server library for Cloudflare Workers and other JavaScript runtimes",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "type-check": "tsc --build --dry",
+    "clean": "rm -rf dist",
+    "docs": "typedoc",
+    "docs:serve": "typedoc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cloudflare-workers",
+    "llm",
+    "ai",
+    "tools",
+    "resources",
+    "prompts",
+    "sampling",
+    "typescript",
+    "edge-computing",
+    "serverless"
+  ],
+  "author": "LiteMCP Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/sven_mpc",
+    "directory": "packages/litemcp"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/sven_mpc/issues"
+  },
+  "homepage": "https://github.com/your-org/sven_mpc/tree/main/packages/litemcp#readme",
+  "dependencies": {
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typedoc": "^0.26.11",
+    "typedoc-plugin-markdown": "^4.2.10",
+    "typescript": "^5.8.3",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

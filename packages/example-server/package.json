@@ -1,0 +1,25 @@
+{
+  "name": "example-server",
+  "version": "1.0.0",
+  "description": "Example LiteMCP server with BTC price tool for Cloudflare Workers",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --build",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "type-check": "tsc --build --dry",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "litemcp": "workspace:*"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241218.0",
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3",
+    "wrangler": "^3.93.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

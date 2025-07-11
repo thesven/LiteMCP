@@ -1,0 +1,60 @@
+{
+  "name": "litemcp-monorepo",
+  "version": "1.0.0",
+  "description": "LiteMCP - A lightweight, complete Model Context Protocol implementation",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "tsc --build",
+    "build:lib": "pnpm --filter litemcp build",
+    "build:example": "pnpm --filter example-server build",
+    "dev": "pnpm --filter example-server dev",
+    "deploy": "pnpm build && pnpm --filter example-server run deploy",
+    "docs": "pnpm --filter litemcp docs",
+    "docs:serve": "pnpm --filter litemcp docs:serve",
+    "type-check": "tsc --build --dry",
+    "type-check:watch": "tsc --build --watch",
+    "clean": "tsc --build --clean && pnpm -r exec rm -rf dist",
+    "clean:deps": "pnpm -r exec rm -rf node_modules && rm -rf node_modules",
+    "lint": "echo \"Add ESLint configuration\"",
+    "format": "echo \"Add Prettier configuration\"",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm --filter litemcp test:watch",
+    "test:coverage": "pnpm --filter litemcp test:coverage",
+    "publish-lib": "pnpm build:lib && pnpm --filter litemcp publish",
+    "changeset": "echo \"Add changeset for versioning\"",
+    "check-types": "pnpm -r type-check",
+    "preview": "pnpm --filter example-server wrangler dev",
+    "deploy:preview": "pnpm build && pnpm --filter example-server wrangler deploy --env preview"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "cloudflare-workers",
+    "llm",
+    "ai",
+    "tools",
+    "resources",
+    "prompts",
+    "sampling",
+    "typescript",
+    "monorepo"
+  ],
+  "author": "LiteMCP Contributors",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/sven_mpc"
+  },
+  "bugs": {
+    "url": "https://github.com/your-org/sven_mpc/issues"
+  },
+  "homepage": "https://github.com/your-org/sven_mpc#readme",
+  "devDependencies": {
+    "@types/node": "^24.0.13",
+    "typescript": "^5.8.3"
+  }
+}
