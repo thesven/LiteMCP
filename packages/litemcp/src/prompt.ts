@@ -1,5 +1,41 @@
 import { MCPPrompt, MCPPromptHandler, MCPPromptArgument, MCPPromptResult, MCPPromptMessage } from './types.js';
 
+/**
+ * Creates a prompt with its handler function.
+ * This is a simple wrapper that returns both the prompt definition and handler
+ * in a format ready for registration with an MCP server.
+ * 
+ * @param prompt - The prompt definition
+ * @param handler - Function to handle prompt execution requests
+ * @returns Object containing the prompt definition and handler
+ * 
+ * @example
+ * ```typescript
+ * const customPrompt = createPrompt(
+ *   {
+ *     name: "code-review",
+ *     description: "Review code for potential issues",
+ *     arguments: [
+ *       { name: "language", required: true },
+ *       { name: "code", required: true }
+ *     ]
+ *   },
+ *   async (args) => {
+ *     return {
+ *       messages: [{
+ *         role: 'user',
+ *         content: {
+ *           type: 'text',
+ *           text: `Please review this ${args.language} code: ${args.code}`
+ *         }
+ *       }]
+ *     };
+ *   }
+ * );
+ * 
+ * server.addPrompt(customPrompt.prompt, customPrompt.handler);
+ * ```
+ */
 export function createPrompt(
   prompt: MCPPrompt,
   handler: MCPPromptHandler
@@ -7,6 +43,35 @@ export function createPrompt(
   return { prompt, handler };
 }
 
+/**
+ * Creates a simple prompt that generates a single message with placeholder substitution.
+ * Convenient for creating basic prompts with dynamic content.
+ * 
+ * @param name - Unique identifier for the prompt
+ * @param description - Human-readable description of what the prompt does
+ * @param messageContent - Template content with {{placeholder}} syntax for argument substitution
+ * @param options - Optional configuration including arguments and message role
+ * @returns Object containing the prompt definition and handler
+ * 
+ * @example
+ * ```typescript
+ * const translatePrompt = createSimplePrompt(
+ *   "translate-text",
+ *   "Translate text to another language",
+ *   "Please translate the following {{source_language}} text to {{target_language}}: {{text}}",
+ *   {
+ *     arguments: [
+ *       { name: "source_language", required: true, description: "Source language" },
+ *       { name: "target_language", required: true, description: "Target language" },
+ *       { name: "text", required: true, description: "Text to translate" }
+ *     ],
+ *     role: 'user'
+ *   }
+ * );
+ * 
+ * server.addPrompt(translatePrompt.prompt, translatePrompt.handler);
+ * ```
+ */
 export function createSimplePrompt(
   name: string,
   description: string,
@@ -52,6 +117,48 @@ export function createSimplePrompt(
   return { prompt, handler };
 }
 
+/**
+ * Creates a multi-step prompt that generates a conversation with multiple messages.
+ * Useful for creating complex prompts that require multiple exchanges or setup.
+ * 
+ * @param name - Unique identifier for the prompt
+ * @param description - Human-readable description of what the prompt does
+ * @param steps - Array of message templates that form the conversation
+ * @param options - Optional configuration including prompt arguments
+ * @returns Object containing the prompt definition and handler
+ * 
+ * @example
+ * ```typescript
+ * const codeReviewPrompt = createMultiStepPrompt(
+ *   "thorough-code-review",
+ *   "Perform a thorough code review with multiple aspects",
+ *   [
+ *     {
+ *       role: 'system',
+ *       content: {
+ *         type: 'text',
+ *         text: 'You are a senior software engineer conducting a code review.'
+ *       }
+ *     },
+ *     {
+ *       role: 'user',
+ *       content: {
+ *         type: 'text',
+ *         text: 'Please review this {{language}} code for: 1) correctness, 2) performance, 3) security. Code: {{code}}'
+ *       }
+ *     }
+ *   ],
+ *   {
+ *     arguments: [
+ *       { name: "language", required: true },
+ *       { name: "code", required: true }
+ *     ]
+ *   }
+ * );
+ * 
+ * server.addPrompt(codeReviewPrompt.prompt, codeReviewPrompt.handler);
+ * ```
+ */
 export function createMultiStepPrompt(
   name: string,
   description: string,
@@ -98,6 +205,34 @@ export function createMultiStepPrompt(
   return { prompt, handler };
 }
 
+/**
+ * Creates a specialized prompt for analytical tasks.
+ * Automatically includes system instructions for analytical expertise and structures
+ * the conversation for data analysis tasks.
+ * 
+ * @param name - Unique identifier for the prompt
+ * @param description - Human-readable description of what the prompt does
+ * @param analysisInstructions - Specific instructions for the analysis task
+ * @param options - Optional configuration including custom arguments
+ * @returns Object containing the prompt definition and handler
+ * 
+ * @example
+ * ```typescript
+ * const dataAnalysisPrompt = createAnalysisPrompt(
+ *   "sales-analysis",
+ *   "Analyze sales data and provide insights",
+ *   "Analyze the sales {{data}} focusing on trends, patterns, and recommendations for {{analysis_type}} analysis.",
+ *   {
+ *     arguments: [
+ *       { name: "data", required: true, description: "Sales data to analyze" },
+ *       { name: "analysis_type", required: false, description: "Type of analysis (trend, seasonal, etc.)" }
+ *     ]
+ *   }
+ * );
+ * 
+ * server.addPrompt(dataAnalysisPrompt.prompt, dataAnalysisPrompt.handler);
+ * ```
+ */
 export function createAnalysisPrompt(
   name: string,
   description: string,

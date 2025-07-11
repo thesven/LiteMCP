@@ -10,16 +10,16 @@ describe('MCPServer', () => {
   beforeEach(() => {
     serverInfo = {
       name: 'test-server',
-      version: '1.0.0'
+      version: '1.0.0',
     };
-    
+
     capabilities = {
       tools: {},
       resources: {},
       prompts: {},
-      sampling: {}
+      sampling: {},
     };
-    
+
     server = new MCPServer(serverInfo, capabilities);
   });
 
@@ -42,12 +42,12 @@ describe('MCPServer', () => {
         inputSchema: {
           type: 'object' as const,
           properties: {},
-          required: []
-        }
+          required: [],
+        },
       };
-      
+
       const handler = vi.fn().mockResolvedValue({ result: 'test' });
-      
+
       expect(() => server.addTool(tool, handler)).not.toThrow();
     });
   });
@@ -58,15 +58,15 @@ describe('MCPServer', () => {
         uri: 'test://resource',
         name: 'Test Resource',
         description: 'A test resource',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       };
-      
+
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://resource',
         mimeType: 'text/plain',
-        text: 'test content'
+        text: 'test content',
       });
-      
+
       expect(() => server.addResource(resource, handler)).not.toThrow();
     });
   });
@@ -77,15 +77,15 @@ describe('MCPServer', () => {
         uriTemplate: 'test://{id}',
         name: 'Test Template',
         description: 'A test template',
-        mimeType: 'application/json'
+        mimeType: 'application/json',
       };
-      
+
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://123',
         mimeType: 'application/json',
-        text: '{"id": "123"}'
+        text: '{"id": "123"}',
       });
-      
+
       expect(() => server.addResourceTemplate(template, handler)).not.toThrow();
     });
   });
@@ -94,14 +94,14 @@ describe('MCPServer', () => {
     it('should add a prompt and handler', () => {
       const prompt = {
         name: 'test-prompt',
-        description: 'Test prompt'
+        description: 'Test prompt',
       };
-      
+
       const handler = vi.fn().mockResolvedValue({
         description: 'Test result',
-        messages: []
+        messages: [],
       });
-      
+
       expect(() => server.addPrompt(prompt, handler)).not.toThrow();
     });
   });
@@ -110,9 +110,9 @@ describe('MCPServer', () => {
     it('should set a sampling handler', () => {
       const handler = vi.fn().mockResolvedValue({
         model: 'test-model',
-        content: [{ type: 'text', text: 'test' }]
+        content: [{ type: 'text', text: 'test' }],
       });
-      
+
       expect(() => server.setSamplingHandler(handler)).not.toThrow();
     });
   });
@@ -130,7 +130,7 @@ describe('MCPServer', () => {
     it('should handle CORS preflight request', async () => {
       const request = new Request('http://localhost', { method: 'OPTIONS' });
       const response = await server.handleRequest(request);
-      
+
       expect(response.status).toBe(204);
       expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*');
       expect(response.headers.get('Access-Control-Allow-Methods')).toBe('GET, POST, OPTIONS');
@@ -140,13 +140,13 @@ describe('MCPServer', () => {
       const tool = {
         name: 'test-tool',
         description: 'Test tool',
-        inputSchema: { type: 'object' as const, properties: {} }
+        inputSchema: { type: 'object' as const, properties: {} },
       };
       server.addTool(tool, vi.fn());
-      
+
       const request = new Request('http://localhost/tools/list', { method: 'GET' });
       const response = await server.handleRequest(request);
-      
+
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data.tools).toHaveLength(1);
@@ -156,7 +156,7 @@ describe('MCPServer', () => {
     it('should handle GET request with sessionId for SSE', async () => {
       const request = new Request('http://localhost?sessionId=123', { method: 'GET' });
       const response = await server.handleRequest(request);
-      
+
       expect(response.status).toBe(200);
       expect(response.headers.get('Content-Type')).toBe('text/event-stream');
     });
@@ -164,7 +164,7 @@ describe('MCPServer', () => {
     it('should return 404 for unknown GET paths', async () => {
       const request = new Request('http://localhost/unknown', { method: 'GET' });
       const response = await server.handleRequest(request);
-      
+
       expect(response.status).toBe(404);
     });
 
@@ -176,13 +176,13 @@ describe('MCPServer', () => {
           jsonrpc: '2.0',
           id: 1,
           method: 'initialize',
-          params: {}
-        })
+          params: {},
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
-      
+
       const data = await response.json();
       expect(data.jsonrpc).toBe('2.0');
       expect(data.id).toBe(1);
@@ -195,23 +195,23 @@ describe('MCPServer', () => {
       const tool = {
         name: 'test-tool',
         description: 'Test tool',
-        inputSchema: { type: 'object' as const, properties: {} }
+        inputSchema: { type: 'object' as const, properties: {} },
       };
       server.addTool(tool, vi.fn());
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
-          method: 'tools/list'
-        })
+          method: 'tools/list',
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
-      
+
       const data = await response.json();
       expect(data.result.tools).toHaveLength(1);
       expect(data.result.tools[0].name).toBe('test-tool');
@@ -221,11 +221,11 @@ describe('MCPServer', () => {
       const tool = {
         name: 'test-tool',
         description: 'Test tool',
-        inputSchema: { type: 'object' as const, properties: {} }
+        inputSchema: { type: 'object' as const, properties: {} },
       };
       const handler = vi.fn().mockResolvedValue({ result: 'success' });
       server.addTool(tool, handler);
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -235,11 +235,11 @@ describe('MCPServer', () => {
           method: 'tools/call',
           params: {
             name: 'test-tool',
-            arguments: { input: 'test' }
-          }
-        })
+            arguments: { input: 'test' },
+          },
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
       expect(handler).toHaveBeenCalledWith({ input: 'test' });
@@ -249,9 +249,9 @@ describe('MCPServer', () => {
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: ''
+        body: '',
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(500);
     });
@@ -260,9 +260,9 @@ describe('MCPServer', () => {
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: 'invalid json'
+        body: 'invalid json',
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(500);
     });
@@ -274,10 +274,10 @@ describe('MCPServer', () => {
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
-          method: 'unknown/method'
-        })
+          method: 'unknown/method',
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(500);
     });
@@ -285,7 +285,7 @@ describe('MCPServer', () => {
     it('should return 405 for unsupported methods', async () => {
       const request = new Request('http://localhost', { method: 'DELETE' });
       const response = await server.handleRequest(request);
-      
+
       expect(response.status).toBe(405);
     });
   });
@@ -297,10 +297,10 @@ describe('MCPServer', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
-          method: 'notifications/initialized'
-        })
+          method: 'notifications/initialized',
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(204);
     });
@@ -312,23 +312,23 @@ describe('MCPServer', () => {
         uri: 'test://resource',
         name: 'Test Resource',
         description: 'A test resource',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       };
       server.addResource(resource, vi.fn());
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
-          method: 'resources/list'
-        })
+          method: 'resources/list',
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
-      
+
       const data = await response.json();
       expect(data.result.resources).toHaveLength(1);
       expect(data.result.resources[0].uri).toBe('test://resource');
@@ -339,23 +339,23 @@ describe('MCPServer', () => {
         uriTemplate: 'test://{id}',
         name: 'Test Template',
         description: 'A test template',
-        mimeType: 'application/json'
+        mimeType: 'application/json',
       };
       server.addResourceTemplate(template, vi.fn());
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
-          method: 'resources/templates/list'
-        })
+          method: 'resources/templates/list',
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
-      
+
       const data = await response.json();
       expect(data.result.resourceTemplates).toHaveLength(1);
       expect(data.result.resourceTemplates[0].uriTemplate).toBe('test://{id}');
@@ -366,15 +366,15 @@ describe('MCPServer', () => {
         uri: 'test://resource',
         name: 'Test Resource',
         description: 'A test resource',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       };
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://resource',
         mimeType: 'text/plain',
-        text: 'test content'
+        text: 'test content',
       });
       server.addResource(resource, handler);
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -382,10 +382,10 @@ describe('MCPServer', () => {
           jsonrpc: '2.0',
           id: 1,
           method: 'resources/read',
-          params: { uri: 'test://resource' }
-        })
+          params: { uri: 'test://resource' },
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
       expect(handler).toHaveBeenCalledWith('test://resource');
@@ -396,15 +396,15 @@ describe('MCPServer', () => {
         uriTemplate: 'test://{id}',
         name: 'Test Template',
         description: 'A test template',
-        mimeType: 'application/json'
+        mimeType: 'application/json',
       };
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://123',
         mimeType: 'application/json',
-        text: '{"id": "123"}'
+        text: '{"id": "123"}',
       });
       server.addResourceTemplate(template, handler);
-      
+
       const request = new Request('http://localhost', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -412,10 +412,10 @@ describe('MCPServer', () => {
           jsonrpc: '2.0',
           id: 1,
           method: 'resources/read',
-          params: { uri: 'test://123' }
-        })
+          params: { uri: 'test://123' },
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(200);
       expect(handler).toHaveBeenCalledWith('test://123');
@@ -429,10 +429,10 @@ describe('MCPServer', () => {
           jsonrpc: '2.0',
           id: 1,
           method: 'resources/read',
-          params: {}
-        })
+          params: {},
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(500);
     });
@@ -445,10 +445,10 @@ describe('MCPServer', () => {
           jsonrpc: '2.0',
           id: 1,
           method: 'resources/read',
-          params: { uri: 'unknown://resource' }
-        })
+          params: { uri: 'unknown://resource' },
+        }),
       });
-      
+
       const response = await server.handleRequest(request);
       expect(response.status).toBe(500);
     });

@@ -25,52 +25,240 @@ const JsonRpcRequestSchema = z.object({
   params: z.any().optional()
 });
 
+/**
+ * Core Model Context Protocol (MCP) server implementation.
+ * 
+ * Provides a complete MCP server that can handle tools, resources, prompts, and sampling requests.
+ * Designed for use in JavaScript runtimes, especially Cloudflare Workers and other edge environments.
+ * 
+ * @example
+ * ```typescript
+ * import { MCPServer, createTool } from 'litemcp';
+ * 
+ * const server = new MCPServer({
+ *   name: "my-server",
+ *   version: "1.0.0"
+ * }, {
+ *   tools: { listChanged: true },
+ *   resources: { subscribe: true }
+ * });
+ * 
+ * // Add tools, resources, prompts...
+ * const weatherTool = createTool({...}, async (args) => {...});
+ * server.addTool(weatherTool.tool, weatherTool.handler);
+ * ```
+ */
 export class MCPServer {
+  /** Registry of available tools */
   private tools: Map<string, MCPTool> = new Map();
+  /** Handlers for tool execution */
   private toolHandlers: Map<string, MCPToolHandler> = new Map();
+  /** Registry of available resources */
   private resources: Map<string, MCPResource> = new Map();
+  /** Handlers for resource reading */
   private resourceHandlers: Map<string, MCPResourceHandler> = new Map();
+  /** Registry of resource templates for dynamic resources */
   private resourceTemplates: Map<string, MCPResourceTemplate> = new Map();
+  /** Registry of available prompts */
   private prompts: Map<string, MCPPrompt> = new Map();
+  /** Handlers for prompt execution */
   private promptHandlers: Map<string, MCPPromptHandler> = new Map();
+  /** Optional handler for LLM sampling requests */
   private samplingHandler: MCPSamplingHandler | null = null;
+  /** Server identification information */
   private serverInfo: MCPServerInfo;
+  /** Server capabilities advertisement */
   private capabilities: MCPCapabilities;
+  /** Current logging level */
   private logLevel: MCPLogLevel = 'info';
 
+  /**
+   * Creates a new MCP server instance.
+   * 
+   * @param serverInfo - Basic information about this server (name, version)
+   * @param capabilities - Capabilities this server supports (tools, resources, prompts, etc.)
+   */
   constructor(serverInfo: MCPServerInfo, capabilities: MCPCapabilities = { tools: {} }) {
     this.serverInfo = serverInfo;
     this.capabilities = capabilities;
   }
 
+  /**
+   * Registers a tool with this MCP server.
+   * 
+   * @template T - Type of the tool's input arguments
+   * @template R - Type of the tool's return value
+   * @param tool - The tool definition including name, description, and input schema
+   * @param handler - Function to handle tool execution requests
+   * 
+   * @example
+   * ```typescript
+   * const weatherTool = {
+   *   name: "get_weather",
+   *   description: "Get current weather",
+   *   inputSchema: {
+   *     type: "object",
+   *     properties: { location: { type: "string" } },
+   *     required: ["location"]
+   *   }
+   * };
+   * 
+   * server.addTool(weatherTool, async (args) => {
+   *   return await fetchWeather(args.location);
+   * });
+   * ```
+   */
   addTool<T = any, R = any>(tool: MCPTool, handler: MCPToolHandler<T, R>): void {
     this.tools.set(tool.name, tool);
     this.toolHandlers.set(tool.name, handler);
   }
 
+  /**
+   * Registers a resource with this MCP server.
+   * 
+   * @param resource - The resource definition including URI, name, and metadata
+   * @param handler - Function to handle resource read requests
+   * 
+   * @example
+   * ```typescript
+   * const configResource = {
+   *   uri: "file:///config.json",
+   *   name: "Configuration",
+   *   mimeType: "application/json"
+   * };
+   * 
+   * server.addResource(configResource, async (uri) => {
+   *   const content = await readConfigFile();
+   *   return { uri, text: JSON.stringify(content), mimeType: "application/json" };
+   * });
+   * ```
+   */
   addResource(resource: MCPResource, handler: MCPResourceHandler): void {
     this.resources.set(resource.uri, resource);
     this.resourceHandlers.set(resource.uri, handler);
   }
 
+  /**
+   * Registers a resource template for dynamic resource generation.
+   * 
+   * @param template - The resource template with URI pattern and metadata
+   * @param handler - Function to handle resource read requests for this template
+   * 
+   * @example
+   * ```typescript
+   * const logTemplate = {
+   *   uriTemplate: "logs://{date}/{level}",
+   *   name: "Log Files",
+   *   mimeType: "text/plain"
+   * };
+   * 
+   * server.addResourceTemplate(logTemplate, async (uri) => {
+   *   const { date, level } = parseLogUri(uri);
+   *   const content = await readLogFile(date, level);
+   *   return { uri, text: content, mimeType: "text/plain" };
+   * });
+   * ```
+   */
   addResourceTemplate(template: MCPResourceTemplate, handler: MCPResourceHandler): void {
     this.resourceTemplates.set(template.uriTemplate, template);
     this.resourceHandlers.set(template.uriTemplate, handler);
   }
 
+  /**
+   * Registers a prompt template with this MCP server.
+   * 
+   * @param prompt - The prompt definition including name, description, and arguments
+   * @param handler - Function to handle prompt execution requests
+   * 
+   * @example
+   * ```typescript
+   * const codeReviewPrompt = {
+   *   name: "code-review",
+   *   description: "Review code for issues",
+   *   arguments: [
+   *     { name: "language", required: true },
+   *     { name: "code", required: true }
+   *   ]
+   * };
+   * 
+   * server.addPrompt(codeReviewPrompt, async (args) => {
+   *   return {
+   *     messages: [{
+   *       role: 'user',
+   *       content: {
+   *         type: 'text',
+   *         text: `Review this ${args.language} code: ${args.code}`
+   *       }
+   *     }]
+   *   };
+   * });
+   * ```
+   */
   addPrompt(prompt: MCPPrompt, handler: MCPPromptHandler): void {
     this.prompts.set(prompt.name, prompt);
     this.promptHandlers.set(prompt.name, handler);
   }
 
+  /**
+   * Sets the handler for LLM sampling requests.
+   * Allows this server to delegate complex reasoning tasks to AI models.
+   * 
+   * @param handler - Function to handle sampling/completion requests
+   * 
+   * @example
+   * ```typescript
+   * server.setSamplingHandler(async (request) => {
+   *   const response = await openai.chat.completions.create({
+   *     model: "gpt-4",
+   *     messages: request.messages,
+   *     temperature: request.temperature
+   *   });
+   *   
+   *   return {
+   *     role: 'assistant',
+   *     content: { type: 'text', text: response.choices[0].message.content },
+   *     model: response.model
+   *   };
+   * });
+   * ```
+   */
   setSamplingHandler(handler: MCPSamplingHandler): void {
     this.samplingHandler = handler;
   }
 
+  /**
+   * Sets the logging level for this server.
+   * 
+   * @param level - The minimum log level to process
+   * 
+   * @example
+   * ```typescript
+   * server.setLogLevel('debug'); // Show all logs including debug
+   * server.setLogLevel('error'); // Only show error and above
+   * ```
+   */
   setLogLevel(level: MCPLogLevel): void {
     this.logLevel = level;
   }
 
+  /**
+   * Main entry point for handling HTTP requests to this MCP server.
+   * Processes JSON-RPC requests and returns appropriate responses.
+   * Includes CORS support and error handling.
+   * 
+   * @param request - The incoming HTTP request
+   * @returns Promise that resolves to an HTTP response
+   * 
+   * @example
+   * ```typescript
+   * // In a Cloudflare Worker or similar environment:
+   * export default {
+   *   async fetch(request: Request): Promise<Response> {
+   *     return server.handleRequest(request);
+   *   }
+   * };
+   * ```
+   */
   async handleRequest(request: Request): Promise<Response> {
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {

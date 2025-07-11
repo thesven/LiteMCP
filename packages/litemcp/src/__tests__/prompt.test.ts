@@ -1,9 +1,9 @@
 import { describe, it, expect, vi } from 'vitest';
-import { 
-  createPrompt, 
-  createSimplePrompt, 
-  createMultiStepPrompt, 
-  createAnalysisPrompt 
+import {
+  createPrompt,
+  createSimplePrompt,
+  createMultiStepPrompt,
+  createAnalysisPrompt,
 } from '../prompt.js';
 import { MCPPromptArgument, MCPPromptMessage } from '../types.js';
 
@@ -12,12 +12,12 @@ describe('Prompt utilities', () => {
     it('should create a basic prompt', () => {
       const config = {
         name: 'test-prompt',
-        description: 'A test prompt'
+        description: 'A test prompt',
       };
 
       const handler = vi.fn().mockResolvedValue({
         description: 'Test result',
-        messages: []
+        messages: [],
       });
 
       const { prompt, handler: returnedHandler } = createPrompt(config, handler);
@@ -31,24 +31,24 @@ describe('Prompt utilities', () => {
         {
           name: 'input',
           description: 'Input text',
-          required: true
+          required: true,
         },
         {
           name: 'format',
           description: 'Output format',
-          required: false
-        }
+          required: false,
+        },
       ];
 
       const config = {
         name: 'parameterized-prompt',
         description: 'A prompt with parameters',
-        arguments: arguments_
+        arguments: arguments_,
       };
 
       const handler = vi.fn().mockResolvedValue({
         description: 'Parameterized result',
-        messages: []
+        messages: [],
       });
 
       const { prompt } = createPrompt(config, handler);
@@ -78,8 +78,8 @@ describe('Prompt utilities', () => {
         role: 'user',
         content: {
           type: 'text',
-          text: 'This is a simple prompt template.'
-        }
+          text: 'This is a simple prompt template.',
+        },
       });
     });
 
@@ -91,8 +91,8 @@ describe('Prompt utilities', () => {
         {
           arguments: [
             { name: 'name', description: 'User name', required: true },
-            { name: 'age', description: 'User age', required: true }
-          ]
+            { name: 'age', description: 'User age', required: true },
+          ],
         }
       );
 
@@ -123,16 +123,16 @@ describe('Prompt utilities', () => {
           role: 'system',
           content: {
             type: 'text',
-            text: 'You are a helpful assistant.'
-          }
+            text: 'You are a helpful assistant.',
+          },
         },
         {
           role: 'user',
           content: {
             type: 'text',
-            text: 'Please analyze this: {{input}}'
-          }
-        }
+            text: 'Please analyze this: {{input}}',
+          },
+        },
       ];
 
       const { prompt, handler } = createMultiStepPrompt(
@@ -140,9 +140,7 @@ describe('Prompt utilities', () => {
         'Multi-step analysis prompt',
         steps,
         {
-          arguments: [
-            { name: 'input', description: 'Input to analyze', required: true }
-          ]
+          arguments: [{ name: 'input', description: 'Input to analyze', required: true }],
         }
       );
 
@@ -166,7 +164,7 @@ describe('Prompt utilities', () => {
 
       expect(prompt.name).toBe('basic-analysis');
       expect(prompt.arguments).toHaveLength(3);
-      
+
       const args = prompt.arguments!;
       expect(args.find(arg => arg.name === 'data')?.required).toBe(true);
       expect(args.find(arg => arg.name === 'analysis_type')?.required).toBe(false);

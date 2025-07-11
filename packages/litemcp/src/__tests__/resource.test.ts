@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { 
-  createResource, 
-  createResourceTemplate, 
-  createTextResource, 
-  createBinaryResource, 
-  createFileResource 
+import {
+  createResource,
+  createResourceTemplate,
+  createTextResource,
+  createBinaryResource,
+  createFileResource,
 } from '../resource.js';
 
 describe('Resource utilities', () => {
@@ -14,13 +14,13 @@ describe('Resource utilities', () => {
         uri: 'test://resource',
         name: 'Test Resource',
         description: 'A test resource',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       };
 
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://resource',
         mimeType: 'text/plain',
-        text: 'content'
+        text: 'content',
       });
 
       const { resource, handler: returnedHandler } = createResource(config, handler);
@@ -32,13 +32,13 @@ describe('Resource utilities', () => {
     it('should create a resource with optional fields', () => {
       const config = {
         uri: 'test://optional',
-        name: 'Optional Resource'
+        name: 'Optional Resource',
       };
 
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://optional',
         mimeType: 'application/octet-stream',
-        blob: new Uint8Array([1, 2, 3])
+        blob: new Uint8Array([1, 2, 3]),
       });
 
       const { resource } = createResource(config, handler);
@@ -56,16 +56,19 @@ describe('Resource utilities', () => {
         uriTemplate: 'test://{id}',
         name: 'Test Template',
         description: 'A test template',
-        mimeType: 'application/json'
+        mimeType: 'application/json',
       };
 
       const handler = vi.fn().mockResolvedValue({
         uri: 'test://123',
         mimeType: 'application/json',
-        text: '{"id": "123"}'
+        text: '{"id": "123"}',
       });
 
-      const { resourceTemplate, handler: returnedHandler } = createResourceTemplate(config, handler);
+      const { resourceTemplate, handler: returnedHandler } = createResourceTemplate(
+        config,
+        handler
+      );
 
       expect(resourceTemplate).toEqual(config);
       expect(returnedHandler).toBe(handler);
@@ -83,7 +86,7 @@ describe('Resource utilities', () => {
       expect(resource).toEqual({
         uri: 'text://simple',
         name: 'Simple Text',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       });
 
       expect(handler).toBeInstanceOf(Function);
@@ -96,7 +99,7 @@ describe('Resource utilities', () => {
         'Custom content',
         {
           description: 'Custom description',
-          mimeType: 'text/markdown'
+          mimeType: 'text/markdown',
         }
       );
 
@@ -104,14 +107,14 @@ describe('Resource utilities', () => {
         uri: 'text://custom',
         name: 'Custom Text',
         description: 'Custom description',
-        mimeType: 'text/markdown'
+        mimeType: 'text/markdown',
       });
 
       const result = await handler('text://custom');
       expect(result).toEqual({
         uri: 'text://custom',
         mimeType: 'text/markdown',
-        text: 'Custom content'
+        text: 'Custom content',
       });
     });
   });
@@ -119,7 +122,7 @@ describe('Resource utilities', () => {
   describe('createBinaryResource', () => {
     it('should create a binary resource with Uint8Array', async () => {
       const binaryData = new Uint8Array([1, 2, 3, 4, 5]);
-      
+
       const { resource, handler } = createBinaryResource(
         'binary://data',
         'Binary Data',
@@ -129,14 +132,14 @@ describe('Resource utilities', () => {
       expect(resource).toEqual({
         uri: 'binary://data',
         name: 'Binary Data',
-        mimeType: 'application/octet-stream'
+        mimeType: 'application/octet-stream',
       });
 
       const result = await handler('binary://data');
       expect(result).toEqual({
         uri: 'binary://data',
         mimeType: 'application/octet-stream',
-        blob: binaryData
+        blob: binaryData,
       });
     });
   });
@@ -152,7 +155,7 @@ describe('Resource utilities', () => {
       expect(resource).toEqual({
         uri: 'file:///test.txt',
         name: 'Test File',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       });
 
       expect(handler).toBeInstanceOf(Function);
@@ -168,15 +171,11 @@ describe('Resource utilities', () => {
         { path: '/test.png', expected: 'image/png' },
         { path: '/test.jpg', expected: 'image/jpeg' },
         { path: '/test.pdf', expected: 'application/pdf' },
-        { path: '/test.unknown', expected: 'application/octet-stream' }
+        { path: '/test.unknown', expected: 'application/octet-stream' },
       ];
 
       testCases.forEach(({ path, expected }) => {
-        const { resource } = createFileResource(
-          `file://${path}`,
-          'Test File',
-          path
-        );
+        const { resource } = createFileResource(`file://${path}`, 'Test File', path);
         expect(resource.mimeType).toBe(expected);
       });
     });

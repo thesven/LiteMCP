@@ -1,20 +1,20 @@
 import { describe, it, expect, vi } from 'vitest';
-import { 
+import {
   createSamplingHandler,
   createSimpleSamplingRequest,
   createConversationSamplingRequest,
   createAnalysisSamplingRequest,
   createCodeReviewSamplingRequest,
-  createSummarizationSamplingRequest
+  createSummarizationSamplingRequest,
 } from '../sampling.js';
-import { MCPSamplingMessage, MCPModelPreferences } from '../types.js';
+import { MCPSamplingMessage, MCPModelPreferences as _MCPModelPreferences } from '../types.js';
 
 describe('Sampling utilities', () => {
   describe('createSamplingHandler', () => {
     it('should create a basic sampling handler', async () => {
       const mockLLMCall = vi.fn().mockResolvedValue({
         model: 'test-model',
-        content: [{ type: 'text', text: 'Response from LLM' }]
+        content: [{ type: 'text', text: 'Response from LLM' }],
       });
 
       const handler = createSamplingHandler(mockLLMCall);
@@ -23,13 +23,13 @@ describe('Sampling utilities', () => {
         messages: [
           {
             role: 'user' as const,
-            content: { type: 'text' as const, text: 'Hello' }
-          }
-        ]
+            content: { type: 'text' as const, text: 'Hello' },
+          },
+        ],
       };
 
       const result = await handler(request);
-      
+
       expect(mockLLMCall).toHaveBeenCalledWith(request);
       expect(result.model).toBe('test-model');
       expect(result.content[0].text).toBe('Response from LLM');
@@ -43,9 +43,9 @@ describe('Sampling utilities', () => {
         messages: [
           {
             role: 'user' as const,
-            content: { type: 'text' as const, text: 'Hello' }
-          }
-        ]
+            content: { type: 'text' as const, text: 'Hello' },
+          },
+        ],
       };
 
       await expect(handler(request)).rejects.toThrow('LLM API error');
@@ -59,20 +59,17 @@ describe('Sampling utilities', () => {
       expect(request.messages).toHaveLength(1);
       expect(request.messages[0]).toEqual({
         role: 'user',
-        content: { type: 'text', text: 'Hello, how are you?' }
+        content: { type: 'text', text: 'Hello, how are you?' },
       });
     });
 
     it('should create a request with custom options', () => {
-      const request = createSimpleSamplingRequest(
-        'Explain quantum physics',
-        {
-          temperature: 0.3,
-          maxTokens: 500,
-          systemPrompt: 'Be educational',
-          includeContext: 'none'
-        }
-      );
+      const request = createSimpleSamplingRequest('Explain quantum physics', {
+        temperature: 0.3,
+        maxTokens: 500,
+        systemPrompt: 'Be educational',
+        includeContext: 'none',
+      });
 
       expect(request.temperature).toBe(0.3);
       expect(request.maxTokens).toBe(500);
@@ -86,16 +83,16 @@ describe('Sampling utilities', () => {
       const messages: MCPSamplingMessage[] = [
         {
           role: 'user',
-          content: { type: 'text', text: 'What is AI?' }
+          content: { type: 'text', text: 'What is AI?' },
         },
         {
           role: 'assistant',
-          content: { type: 'text', text: 'AI stands for Artificial Intelligence...' }
+          content: { type: 'text', text: 'AI stands for Artificial Intelligence...' },
         },
         {
           role: 'user',
-          content: { type: 'text', text: 'Tell me more about machine learning' }
-        }
+          content: { type: 'text', text: 'Tell me more about machine learning' },
+        },
       ];
 
       const request = createConversationSamplingRequest(messages);
@@ -107,9 +104,7 @@ describe('Sampling utilities', () => {
 
   describe('createAnalysisSamplingRequest', () => {
     it('should create an analysis request with default settings', () => {
-      const request = createAnalysisSamplingRequest(
-        'Analyze this data: [1,2,3,4,5]'
-      );
+      const request = createAnalysisSamplingRequest('Analyze this data: [1,2,3,4,5]');
 
       expect(request.messages).toHaveLength(2);
       expect(request.messages[0].role).toBe('system');

@@ -48,13 +48,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/sven_mpc",
+    "url": "https://github.com/litemcp/litemcp",
     "directory": "packages/litemcp"
   },
   "bugs": {
-    "url": "https://github.com/your-org/sven_mpc/issues"
+    "url": "https://github.com/litemcp/litemcp/issues"
   },
-  "homepage": "https://github.com/your-org/sven_mpc/tree/main/packages/litemcp#readme",
+  "homepage": "https://github.com/litemcp/litemcp/tree/main/packages/litemcp#readme",
   "dependencies": {
     "zod": "^4.0.5"
   },
@@ -71,5 +71,10 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/litemcp"
+  },
+  "sideEffects": false
 }

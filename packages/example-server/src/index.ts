@@ -101,18 +101,20 @@ const { tool: btcPriceTool, handler: btcPriceHandler } = createTool(
 
     // Format the response based on requested options
     const bitcoin = btcData.bitcoin;
+    const price = bitcoin.usd;
+    const lastUpdated = new Date(bitcoin.last_updated_at * 1000).toISOString();
+    
     let result: any = {
-      price: bitcoin.usd,
+      price: price,
       currency: 'USD',
-      last_updated: new Date(bitcoin.last_updated_at * 1000).toISOString(),
+      last_updated: lastUpdated,
       source: 'CoinGecko'
     };
 
+    // Add 24h change data if requested
     if (args.include_change !== false) {
-      result.change_24h = {
-        percentage: bitcoin.usd_24h_change,
-        direction: bitcoin.usd_24h_change >= 0 ? 'up' : 'down'
-      };
+      result.change_24h = bitcoin.usd_24h_change;
+      result.change_24h_percent = `${bitcoin.usd_24h_change.toFixed(2)}%`;
     }
 
     if (args.include_volume) {
@@ -123,23 +125,29 @@ const { tool: btcPriceTool, handler: btcPriceHandler } = createTool(
       result.market_cap = bitcoin.usd_market_cap;
     }
 
+    let responseText = `Bitcoin Price: $${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    
+    if (args.include_change !== false) {
+      const changeIcon = bitcoin.usd_24h_change >= 0 ? '📈' : '📉';
+      responseText += `\n${changeIcon} 24h Change: ${bitcoin.usd_24h_change.toFixed(2)}%`;
+    }
+    
+    if (args.include_volume) {
+      responseText += `\n📊 24h Volume: $${bitcoin.usd_24h_vol.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    }
+    
+    if (args.include_market_cap) {
+      responseText += `\n💰 Market Cap: $${bitcoin.usd_market_cap.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    }
+    
+    responseText += `\nLast Updated: ${new Date(lastUpdated).toLocaleString()}`;
+    responseText += '\nSource: CoinGecko API';
+
     return {
       content: [
         {
           type: 'text',
-          text: `Bitcoin Price: $${bitcoin.usd.toLocaleString()}\n${
-            args.include_change !== false 
-              ? `24h Change: ${bitcoin.usd_24h_change.toFixed(2)}% ${bitcoin.usd_24h_change >= 0 ? '📈' : '📉'}\n`
-              : ''
-          }${
-            args.include_volume 
-              ? `24h Volume: $${(bitcoin.usd_24h_vol / 1e9).toFixed(2)}B\n`
-              : ''
-          }${
-            args.include_market_cap 
-              ? `Market Cap: $${(bitcoin.usd_market_cap / 1e9).toFixed(2)}B\n`
-              : ''
-          }Last Updated: ${new Date(bitcoin.last_updated_at * 1000).toLocaleString()}`
+          text: responseText
         }
       ],
       isError: false,
@@ -150,15 +158,26 @@ const { tool: btcPriceTool, handler: btcPriceHandler } = createTool(
 
 // Fetch BTC price from CoinGecko API
 async function fetchBTCPrice(): Promise<CoinGeckoResponse> {
-  const response = await fetch(
-    'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_last_updated_at=true'
-  );
+  try {
+    const response = await fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_market_cap=true&include_last_updated_at=true'
+    );
 
-  if (!response.ok) {
-    throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json() as CoinGeckoResponse;
+    
+    if (!data.bitcoin) {
+      throw new Error('Invalid response format from CoinGecko API');
+    }
+    
+    return data;
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    throw new Error(`Failed to fetch Bitcoin price from CoinGecko: ${errorMessage}`);
   }
-
-  return await response.json();
 }
 
 // Cloudflare Workers export

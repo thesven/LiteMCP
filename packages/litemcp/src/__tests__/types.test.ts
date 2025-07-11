@@ -7,24 +7,24 @@ import type {
   MCPServerInfo,
   MCPCapabilities,
   JsonRpcRequest,
-  JsonRpcResponse,
-  MCPInitializeResult,
+  JsonRpcResponse as _JsonRpcResponse,
+  MCPInitializeResult as _MCPInitializeResult,
   MCPResource,
-  MCPResourceTemplate,
-  MCPResourceContent,
+  MCPResourceTemplate as _MCPResourceTemplate,
+  MCPResourceContent as _MCPResourceContent,
   MCPResourceHandler,
   MCPPrompt,
-  MCPPromptArgument,
-  MCPPromptMessage,
-  MCPPromptResult,
-  MCPPromptHandler,
-  MCPSamplingMessage,
+  MCPPromptArgument as _MCPPromptArgument,
+  MCPPromptMessage as _MCPPromptMessage,
+  MCPPromptResult as _MCPPromptResult,
+  MCPPromptHandler as _MCPPromptHandler,
+  MCPSamplingMessage as _MCPSamplingMessage,
   MCPSamplingRequest,
-  MCPSamplingResponse,
-  MCPSamplingHandler,
-  MCPModelPreferences,
-  MCPLogLevel,
-  MCPLogEntry
+  MCPSamplingResponse as _MCPSamplingResponse,
+  MCPSamplingHandler as _MCPSamplingHandler,
+  MCPModelPreferences as _MCPModelPreferences,
+  MCPLogLevel as _MCPLogLevel,
+  MCPLogEntry as _MCPLogEntry,
 } from '../types.js';
 
 describe('Type definitions', () => {
@@ -36,10 +36,10 @@ describe('Type definitions', () => {
         inputSchema: {
           type: 'object',
           properties: {
-            input: { type: 'string' }
+            input: { type: 'string' },
           },
-          required: ['input']
-        }
+          required: ['input'],
+        },
       };
 
       expect(tool.name).toBe('test-tool');
@@ -51,7 +51,7 @@ describe('Type definitions', () => {
     it('should define server info structure', () => {
       const serverInfo: MCPServerInfo = {
         name: 'test-server',
-        version: '1.0.0'
+        version: '1.0.0',
       };
 
       expect(serverInfo.name).toBe('test-server');
@@ -63,17 +63,17 @@ describe('Type definitions', () => {
     it('should define capabilities structure', () => {
       const capabilities: MCPCapabilities = {
         tools: {
-          listChanged: true
+          listChanged: true,
         },
         resources: {
           subscribe: true,
-          listChanged: false
+          listChanged: false,
         },
         prompts: {
-          listChanged: true
+          listChanged: true,
         },
         sampling: {},
-        logging: {}
+        logging: {},
       };
 
       expect(capabilities.tools?.listChanged).toBe(true);
@@ -87,7 +87,7 @@ describe('Type definitions', () => {
         jsonrpc: '2.0',
         id: 1,
         method: 'test/method',
-        params: { test: 'value' }
+        params: { test: 'value' },
       };
 
       expect(request.jsonrpc).toBe('2.0');
@@ -101,7 +101,7 @@ describe('Type definitions', () => {
         uri: 'test://resource',
         name: 'Test Resource',
         description: 'A test resource',
-        mimeType: 'text/plain'
+        mimeType: 'text/plain',
       };
 
       expect(resource.uri).toBe('test://resource');
@@ -118,9 +118,9 @@ describe('Type definitions', () => {
           {
             name: 'input',
             description: 'Input parameter',
-            required: true
-          }
-        ]
+            required: true,
+          },
+        ],
       };
 
       expect(prompt.name).toBe('test-prompt');
@@ -134,11 +134,11 @@ describe('Type definitions', () => {
         messages: [
           {
             role: 'user',
-            content: { type: 'text', text: 'Hello' }
-          }
+            content: { type: 'text', text: 'Hello' },
+          },
         ],
         temperature: 0.7,
-        maxTokens: 1000
+        maxTokens: 1000,
       };
 
       expect(request.messages).toHaveLength(1);
@@ -148,17 +148,18 @@ describe('Type definitions', () => {
 
   describe('Handler types', () => {
     it('should define MCPToolHandler', () => {
-      const handler: MCPToolHandler<{ input: string }, { output: string }> = 
-        async (args) => ({ output: args.input.toUpperCase() });
+      const handler: MCPToolHandler<{ input: string }, { output: string }> = async args => ({
+        output: args.input.toUpperCase(),
+      });
 
       expect(handler).toBeInstanceOf(Function);
     });
 
     it('should define MCPResourceHandler', () => {
-      const handler: MCPResourceHandler = async (uri) => ({
+      const handler: MCPResourceHandler = async uri => ({
         uri,
         mimeType: 'text/plain',
-        text: 'content'
+        text: 'content',
       });
 
       expect(handler).toBeInstanceOf(Function);

@@ -9,10 +9,10 @@ describe('createTool', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          input: { type: 'string' }
+          input: { type: 'string' },
         },
-        required: ['input']
-      }
+        required: ['input'],
+      },
     };
 
     const handler = vi.fn().mockResolvedValue({ result: 'success' });
@@ -24,10 +24,10 @@ describe('createTool', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          input: { type: 'string' }
+          input: { type: 'string' },
         },
-        required: ['input']
-      }
+        required: ['input'],
+      },
     });
 
     expect(returnedHandler).toBe(handler);
@@ -40,36 +40,36 @@ describe('createTool', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          stringField: { 
+          stringField: {
             type: 'string',
             description: 'A string field',
-            default: 'default-value'
+            default: 'default-value',
           },
-          numberField: { 
+          numberField: {
             type: 'number',
             minimum: 0,
-            maximum: 100
+            maximum: 100,
           },
-          booleanField: { 
-            type: 'boolean' 
+          booleanField: {
+            type: 'boolean',
           },
           arrayField: {
             type: 'array',
             items: { type: 'string' },
             minItems: 1,
-            maxItems: 10
+            maxItems: 10,
           },
           objectField: {
             type: 'object',
             properties: {
               nestedString: { type: 'string' },
-              nestedNumber: { type: 'number' }
+              nestedNumber: { type: 'number' },
             },
-            required: ['nestedString']
-          }
+            required: ['nestedString'],
+          },
         },
-        required: ['stringField', 'numberField']
-      }
+        required: ['stringField', 'numberField'],
+      },
     };
 
     const handler = vi.fn().mockResolvedValue({ result: 'complex success' });
@@ -80,13 +80,13 @@ describe('createTool', () => {
     expect(tool.inputSchema.properties.stringField).toEqual({
       type: 'string',
       description: 'A string field',
-      default: 'default-value'
+      default: 'default-value',
     });
     expect(tool.inputSchema.properties.arrayField).toEqual({
       type: 'array',
       items: { type: 'string' },
       minItems: 1,
-      maxItems: 10
+      maxItems: 10,
     });
     expect(tool.inputSchema.required).toEqual(['stringField', 'numberField']);
     expect(returnedHandler).toBe(handler);
@@ -99,9 +99,9 @@ describe('createTool', () => {
       inputSchema: {
         type: 'object',
         properties: {
-          optionalField: { type: 'string' }
-        }
-      }
+          optionalField: { type: 'string' },
+        },
+      },
     };
 
     const handler = vi.fn().mockResolvedValue({ result: 'optional success' });
@@ -117,11 +117,11 @@ describe('createTool', () => {
       description: 'Test handler identity',
       inputSchema: {
         type: 'object',
-        properties: {}
-      }
+        properties: {},
+      },
     };
 
-    const originalHandler = async (args: any) => ({ result: 'identity test' });
+    const originalHandler = async (_args: any) => ({ result: 'identity test' });
     const { handler: returnedHandler } = createTool(config, originalHandler);
 
     expect(returnedHandler).toBe(originalHandler);
@@ -145,16 +145,18 @@ describe('createTool', () => {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          count: { type: 'number' }
+          count: { type: 'number' },
         },
-        required: ['name', 'count']
-      }
+        required: ['name', 'count'],
+      },
     };
 
-    const handler = vi.fn().mockImplementation(async (args: TestInput): Promise<TestOutput> => ({
-      message: `Hello ${args.name}`,
-      processed: args.count * 2
-    }));
+    const handler = vi.fn().mockImplementation(
+      async (args: TestInput): Promise<TestOutput> => ({
+        message: `Hello ${args.name}`,
+        processed: args.count * 2,
+      })
+    );
 
     const { tool, handler: typedHandler } = createTool<TestInput, TestOutput>(config, handler);
 
@@ -168,8 +170,8 @@ describe('createTool', () => {
       description: 'Tool with empty properties',
       inputSchema: {
         type: 'object',
-        properties: {}
-      }
+        properties: {},
+      },
     };
 
     const handler = vi.fn().mockResolvedValue({ result: 'empty success' });
@@ -186,11 +188,11 @@ describe('createTool', () => {
         type: 'object',
         properties: {
           field1: { type: 'string', pattern: '^[a-z]+$' },
-          field2: { type: 'integer', multipleOf: 5 }
+          field2: { type: 'integer', multipleOf: 5 },
         },
         required: ['field1'],
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     };
 
     const handler = vi.fn();

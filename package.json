@@ -2,6 +2,7 @@
   "name": "litemcp-monorepo",
   "version": "1.0.0",
   "description": "LiteMCP - A lightweight, complete Model Context Protocol implementation",
+  "type": "module",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -18,9 +19,12 @@
     "type-check:watch": "tsc --build --watch",
     "clean": "tsc --build --clean && pnpm -r exec rm -rf dist",
     "clean:deps": "pnpm -r exec rm -rf node_modules && rm -rf node_modules",
-    "lint": "echo \"Add ESLint configuration\"",
-    "format": "echo \"Add Prettier configuration\"",
+    "lint": "eslint packages/*/src/**/*.ts --max-warnings 0",
+    "lint:fix": "eslint packages/*/src/**/*.ts --fix",
+    "format": "prettier --write packages/*/src/**/*.ts",
+    "format:check": "prettier --check packages/*/src/**/*.ts",
     "test": "pnpm -r test",
+    "test:ci": "pnpm test && pnpm lint && pnpm type-check",
     "test:watch": "pnpm --filter litemcp test:watch",
     "test:coverage": "pnpm --filter litemcp test:coverage",
     "publish-lib": "pnpm build:lib && pnpm --filter litemcp publish",
@@ -47,14 +51,18 @@
   "packageManager": "pnpm@10.12.1",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/sven_mpc"
+    "url": "https://github.com/litemcp/litemcp"
   },
   "bugs": {
-    "url": "https://github.com/your-org/sven_mpc/issues"
+    "url": "https://github.com/litemcp/litemcp/issues"
   },
-  "homepage": "https://github.com/your-org/sven_mpc#readme",
+  "homepage": "https://github.com/litemcp/litemcp#readme",
   "devDependencies": {
     "@types/node": "^24.0.13",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "eslint": "^9.17.0",
+    "prettier": "^3.4.2",
     "typescript": "^5.8.3"
   }
 }
